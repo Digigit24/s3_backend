@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password_hash String
+  created_at    DateTime @default(now())
+}
+
+model Client {
+  id                  String   @id @default(uuid())
+  name                String
+  status              String   @default("pending")
+  s3_prefix           String   @unique
+  iam_user_arn        String?
+  access_key_id       String?
+  storage_used_bytes  BigInt   @default(0)
+  storage_limit_bytes BigInt   @default(1073741824)
+  created_at          DateTime @default(now())
+  audit_logs          AuditLog[]
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  action       String
+  client       Client?  @relation(fields: [client_id], references: [id])
+  client_id    String?
+  performed_by String
+  created_at   DateTime @default(now())
+}
